@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Transcription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="h-screen flex flex-col max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center py-6 px-4">
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">
+                Live Transcription
+            </h1>
+        </div>
+
+        <!-- Connection Status -->
+        <div class="px-4 mb-4">
+            <div id="connectionStatus" class="flex items-center justify-center p-3 rounded-xl glass-effect">
+                <div id="statusIndicator" class="w-3 h-3 rounded-full mr-3 bg-red-500"></div>
+                <span id="statusText" class="font-medium">Disconnected</span>
+            </div>
+        </div>
+
+        <!-- Transcription Display - Takes remaining space -->
+        <div class="flex-1 px-4 mb-4 min-h-0">
+            <div class="bg-gray-800 rounded-xl p-4 h-full flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-200">Transcription</h2>
+                    <button id="copyBtn" class="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-copy mr-2"></i>
+                        Copy All
+                    </button>
+                </div>
+                
+                <div id="transcriptionText" class="flex-1 text-gray-300 leading-relaxed overflow-y-auto">
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-microphone-slash text-4xl mb-4 opacity-50"></i>
+                            <p>Click the call button to start transcription</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Visualizer -->
+        <div id="audioVisualizer" class="hidden px-4 mb-4">
+            <div class="flex items-center justify-center space-x-1 h-12">
+                <div class="audio-bar w-2 bg-blue-500 rounded-full"></div>
+                <div class="audio-bar w-2 bg-blue-500 rounded-full"></div>
+                <div class="audio-bar w-2 bg-blue-500 rounded-full"></div>
+                <div class="audio-bar w-2 bg-blue-500 rounded-full"></div>
+                <div class="audio-bar w-2 bg-blue-500 rounded-full"></div>
+            </div>
+        </div>
+
+        <!-- Control Buttons - Fixed at bottom -->
+        <div class="px-4 pb-6">
+            <div class="flex justify-center">
+                <!-- Call Button (shown when disconnected) -->
+                <button id="callBtn" class="flex items-center px-8 py-4 bg-green-600 hover:bg-green-700 rounded-full transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <i class="fas fa-phone mr-3"></i>
+                    Start Call
+                </button>
+
+                <!-- Control Buttons (shown when connected) -->
+                <div id="controlButtons" class="hidden flex space-x-6">
+                    <button id="muteBtn" class="flex items-center px-6 py-4 bg-yellow-600 hover:bg-yellow-700 rounded-full transition-all duration-200 font-semibold shadow-lg hover:shadow-xl min-w-[120px] justify-center">
+                        <i class="fas fa-microphone mr-2"></i>
+                        <span id="muteText">Mute</span>
+                    </button>
+                    
+                    <button id="hangupBtn" class="flex items-center px-6 py-4 bg-red-600 hover:bg-red-700 rounded-full transition-all duration-200 font-semibold shadow-lg hover:shadow-xl min-w-[120px] justify-center">
+                        <i class="fas fa-phone-slash mr-2"></i>
+                        Hang Up
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <script src="static/script.js"></script>
+</body>
+</html>
