@@ -40,7 +40,7 @@ Optimized for GPU (CUDA + cuDNN) but also supports CPU fallback.
 
 ---
 
-## ⚠️ Requirements
+## ⚠️ Requirements for GPU setup
 
 - cuDNN version **9.1 or higher**
 - CUDA-enabled GPU recommended for real-time performance
