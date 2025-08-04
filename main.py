@@ -151,7 +151,7 @@ class AudioProcessor:
                 self.audio_buffer = self.audio_buffer[last_speech_end - overlap_samples:]
                 
                 segment_duration_ms = (len(segment_to_transcribe) * 1000) // SAMPLING_RATE
-                print(f"✅ Max duration reached. Splitting with {OVERLAP_DURATION_MS}ms overlap. Duration: {segment_duration_ms}ms")
+                # print(f"✅ Max duration reached. Splitting with {OVERLAP_DURATION_MS}ms overlap. Duration: {segment_duration_ms}ms")
                 return segment_to_transcribe, True  # True indicates overlap
             else:
                 # Normal split at silence - transcribe everything up to last speech
@@ -160,7 +160,7 @@ class AudioProcessor:
                 self.audio_buffer = self.audio_buffer[last_speech_end:]
                 
                 segment_duration_ms = (len(segment_to_transcribe) * 1000) // SAMPLING_RATE
-                print(f"✅ Segment ready for ASR (silence detected: {silence_duration_ms}ms). Duration: {segment_duration_ms}ms")
+                # print(f"✅ Segment ready for ASR (silence detected: {silence_duration_ms}ms). Duration: {segment_duration_ms}ms")
                 return segment_to_transcribe, False  # False indicates no overlap
 
         return None
