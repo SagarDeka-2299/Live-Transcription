@@ -1,6 +1,6 @@
 # 🎙️ Real-Time Voice Transcription App
 
-A lightweight real-time voice transcription system powered by WebSocket audio streaming and Faster-Whisper for accurate, fast speech-to-text on GPU.
+A lightweight real-time voice transcription system powered by WebSocket audio streaming and Faster-Whisper, Silero VAD for accurate, fast speech-to-text on GPU and CPU.
 
 ---
 
