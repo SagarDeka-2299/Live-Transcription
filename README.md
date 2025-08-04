@@ -51,5 +51,4 @@ Optimized for GPU (CUDA + cuDNN) but also supports CPU fallback.
 
 I'm an engineer and curious learner passionate about deep learning, AI/ML application development, data pipelines, and automation.
 
-📧 Email: *[your-gmail]*  
-🔗 LinkedIn: *[your-linkedin]*  
+📧 Email: *sagardekaofficial@gmail.com*
