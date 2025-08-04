@@ -6,24 +6,21 @@ websockets==12.0
 # Audio processing
 numpy==1.26.4
 
-# PyTorch and CUDA support
-# For CPU only:
-torch==2.2.0
-torchaudio==2.2.0
+# PyTorch - CPU only version (avoids CUDA downloads)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.0+cpu
 
 # For CUDA 11.8 (uncomment if using GPU):
 # torch==2.2.0+cu118
-# torchaudio==2.2.0+cu118
 # --extra-index-url https://download.pytorch.org/whl/cu118
 
 # For CUDA 12.1 (uncomment if using GPU):
 # torch==2.2.0+cu121
-# torchaudio==2.2.0+cu121
 # --extra-index-url https://download.pytorch.org/whl/cu121
 
 # Speech processing models
 faster-whisper==1.0.1
-# Note: silero-vad is loaded via torch.hub, no pip package needed
+silero-vad==5.1.2  # Using pip package instead of torch.hub
 
 # ONNX runtime for Silero VAD
 onnxruntime==1.17.1

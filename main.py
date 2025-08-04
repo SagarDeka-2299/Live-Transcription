@@ -7,6 +7,7 @@ import torch
 import asyncio
 from typing import List, Dict, Optional
 import os
+from silero_vad import load_silero_vad, get_speech_timestamps
 
 # --- Configuration & Constants ---
 
@@ -36,29 +37,15 @@ from faster_whisper import WhisperModel
 
 # Global variables to hold the loaded models
 silero_model = None
-silero_utils = None
 whisper_model = None
 
 def load_models():
     """Loads Silero VAD and Whisper models into global variables."""
-    global silero_model, silero_utils, whisper_model
+    global silero_model, whisper_model
     
     print("Loading Silero VAD model...")
-    model, utils = torch.hub.load(
-        repo_or_dir='snakers4/silero-vad',
-        model='silero_vad',
-        force_reload=False,
-        onnx=True
-    )
-    # # Move Silero VAD to GPU if available
-    # if torch.cuda.is_available():
-    #     model = model.cuda()
-    #     print("✅ Silero VAD model loaded on GPU")
-    # else:
-    #     print("✅ Silero VAD model loaded on CPU")
-    
-    silero_model = model
-    silero_utils = utils
+    silero_model = load_silero_vad(onnx=True)  # Use ONNX for better performance
+    print("✅ Silero VAD model loaded")
 
     print(f"Loading Whisper model '{MODEL_SIZE}' on {DEVICE_TYPE}...")
     whisper_model = WhisperModel(MODEL_SIZE, device=DEVICE_TYPE, compute_type=COMPUTE_TYPE)
@@ -70,10 +57,9 @@ class AudioProcessor:
     """
     Manages audio buffering and speech detection for a single client.
     """
-    def __init__(self, vad_model, vad_utils, websocket: WebSocket):
+    def __init__(self, vad_model, websocket: WebSocket):
         self.audio_buffer = np.array([], dtype=np.float32)
         self.vad_model = vad_model
-        self.vad_utils = vad_utils
         self.websocket = websocket
         self.last_segment_words = []  # Store words from previous segment for overlap comparison
         self.current_transcription = ""
@@ -91,7 +77,6 @@ class AudioProcessor:
 
     def _get_speech_timestamps(self) -> List[Dict[str, int]]:
         """Runs Silero VAD on the current audio buffer to find speech segments."""
-        (get_speech_timestamps, _, _, *_) = self.vad_utils
         
         # Convert to tensor and move to GPU if available
         audio_tensor = torch.from_numpy(self.audio_buffer)
@@ -322,7 +307,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("WebSocket connection established.")
 
-    audio_processor = AudioProcessor(silero_model, silero_utils, websocket)
+    audio_processor = AudioProcessor(silero_model, websocket)
 
     if not whisper_model:
         print("❌ Whisper model not loaded. Cannot process audio.")
