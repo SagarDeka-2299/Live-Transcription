@@ -110,6 +110,50 @@ class LiveTranscription {
         animate();
     }
 
+    async setupMediaRecorder() {
+        // Create AudioContext for processing
+        this.audioContext = new AudioContext({ sampleRate: 16000 });
+
+        // Load the AudioWorklet processor module.
+        // Ensure the path is correct relative to your HTML file.
+        try {
+            await this.audioContext.audioWorklet.addModule('static/audio-processor.js');
+            console.log('AudioWorklet processor loaded successfully.');
+        } catch (e) {
+            console.error('Error loading AudioWorklet processor:', e);
+            this.showToast('Failed to load audio processor.', 'error');
+            return;
+        }
+
+        // Create a MediaStreamSource from the microphone stream
+        const source = this.audioContext.createMediaStreamSource(this.audioStream);
+
+        // Create an instance of our AudioWorkletNode
+        this.workletNode = new AudioWorkletNode(this.audioContext, 'audio-processor');
+
+        // THIS IS THE NEW PART: Listen for messages (audio chunks) from the worklet.
+        this.workletNode.port.onmessage = (event) => {
+            // The event.data is the ArrayBuffer we sent from the worklet.
+            // We need to convert it back to a Float32Array.
+            const float32Data = new Float32Array(event.data);
+            
+            // Now, we do the conversion and WebSocket sending here, on the main thread.
+            if (this.websocket && this.websocket.readyState === WebSocket.OPEN && !this.isMuted) {
+                const pcmData = this.float32ToPCM16(float32Data);
+                this.websocket.send(pcmData);
+            }
+        };
+        
+        // Connect the audio graph: MicSource -> WorkletNode
+        // The worklet will process the audio, but we don't connect it to the destination
+        // unless you want to hear your own voice (which can cause feedback).
+        source.connect(this.workletNode);
+        // Optional: connect to destination to hear yourself.
+        // this.workletNode.connect(this.audioContext.destination);
+
+        console.log('Audio processing setup complete using AudioWorklet. 🚀');
+    }
+
     async startCall() {
         try {
             this.updateConnectionStatus('connecting');
@@ -181,35 +225,7 @@ class LiveTranscription {
         });
     }
 
-    setupMediaRecorder() {
-        // Create AudioContext for processing
-        this.audioContext = new AudioContext({ sampleRate: 16000 });
-        
-        // Create MediaStreamSource from the microphone stream
-        const source = this.audioContext.createMediaStreamSource(this.audioStream);
-        
-        // Create ScriptProcessor for real-time audio processing
-        this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
-        
-        this.processor.onaudioprocess = (event) => {
-            if (this.websocket && this.websocket.readyState === WebSocket.OPEN && !this.isMuted) {
-                const inputBuffer = event.inputBuffer;
-                const inputData = inputBuffer.getChannelData(0);
-                
-                // Convert float32 audio data to int16 PCM
-                const pcmData = this.float32ToPCM16(inputData);
-                
-                // Send the PCM data to the WebSocket
-                this.websocket.send(pcmData);
-            }
-        };
-        
-        // Connect the audio processing chain
-        source.connect(this.processor);
-        this.processor.connect(this.audioContext.destination);
-        
-        console.log('Audio processing setup complete');
-    }
+
 
     float32ToPCM16(float32Array) {
         const buffer = new ArrayBuffer(float32Array.length * 2);
@@ -321,6 +337,13 @@ class LiveTranscription {
     cleanup() {
         this.isRecording = false;
         this.isMuted = false;
+
+        if (this.workletNode) {
+            this.workletNode.port.onmessage = null; // Remove the event listener
+            this.workletNode.disconnect();
+            this.workletNode = null;
+            console.log('AudioWorklet disconnected.');
+        }
 
         // Clean up audio processing
         if (this.processor) {
